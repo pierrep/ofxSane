@@ -124,16 +124,6 @@ protected:
         cout << "sane_start" << endl;
         printStatus(sane_start(handle));
 
-//        int totalDescriptors;
-//        sane_control_option (handle, 0, SANE_ACTION_GET_VALUE, &totalDescriptors, 0);
-//        cout << totalDescriptors << " descriptors total:" << endl;
-//        for(int i = 0; i < totalDescriptors; i++) {
-//            const SANE_Option_Descriptor* cur = sane_get_option_descriptor(handle, i);
-//            cout << i << ": ";
-//            printDescriptor(cur);
-//        }
-
-
         SANE_Parameters parameters;
         cout << "sane_get_parameters" << endl;
         printStatus(sane_get_parameters(handle, &parameters));
