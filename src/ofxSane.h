@@ -20,6 +20,8 @@ private:
     SANE_Handle handle;
     int totalDevices;
     int bufferSize;
+    int pixelsPerLine;
+    int totalLines;
     bool scanning;
     unsigned char* buffer;
 public:
@@ -28,6 +30,8 @@ public:
         bufferSize = 0;
         buffer = NULL;
         scanning = false;
+        pixelsPerLine = 0;
+        totalLines = 0;
     }
     ~ofxSane() {
         if(totalDevices > 0) {
@@ -41,11 +45,11 @@ public:
     }
     void setup() {
         SANE_Int versionCode;
-        cout << "sane_init" << endl;
+        cout << "sane_init: ";
         printStatus(sane_init(&versionCode, NULL));
         cout << "running SANE v" << SANE_VERSION_MAJOR(versionCode) << "." << SANE_VERSION_MINOR(versionCode) << endl;
 
-        cout << "sane_get_devices" << endl;
+        cout << "sane_get_devices: ";
         const SANE_Device** deviceList;
         printStatus(sane_get_devices(&deviceList, true));
 
@@ -57,7 +61,7 @@ public:
 
         if(totalDevices > 0) {
             SANE_String_Const name = deviceList[0]->name;
-            cout << "sane_open(" << name << ")" << endl;
+            cout << "sane_open(" << name << "): ";
             printStatus(sane_open(name, &handle));
 
             // use sane_get_option_descriptor to get options
@@ -71,15 +75,19 @@ public:
             }
 
             SANE_Char mode[] = "Color";
-            cout << "setting mode to " << mode << endl;
+            cout << "setting mode to " << mode << ": ";
             printStatus(sane_control_option(handle, 2, SANE_ACTION_SET_VALUE, &mode, NULL));
 
-            SANE_Int dpi = 1200;
-            cout << "setting dpi to " << dpi << endl;
-            printStatus(sane_control_option(handle, 5, SANE_ACTION_SET_VALUE, &dpi, NULL));
+            SANE_Int dpi = 300;
+            cout << "setting dpi to " << dpi << ": ";
+            printStatus(sane_control_option(handle, 6, SANE_ACTION_SET_VALUE, &dpi, NULL));
+
+            SANE_Int bitdepth = 8;
+            cout << "setting bitdepth to " << bitdepth << ": ";
+            printStatus(sane_control_option(handle, 5, SANE_ACTION_SET_VALUE, &bitdepth, NULL));
 
             SANE_Int xsize = 215;
-            cout << "setting xsize to " << xsize << " mm" << endl;
+            cout << "setting xsize to " << xsize << " mm" << ": ";
             xsize *= (1 << 16);
             printStatus(sane_control_option(handle, 10, SANE_ACTION_SET_VALUE, &xsize, NULL));
         }
@@ -100,6 +108,15 @@ public:
     const unsigned char* getBuffer() {
         return buffer;
     }
+    int getPixelsPerLine()
+    {
+        return pixelsPerLine;
+    }
+    int getTotalLines()
+    {
+        return totalLines;
+    }
+
 protected:
     void threadedFunction() {
         scanning = true;
@@ -107,12 +124,32 @@ protected:
         cout << "sane_start" << endl;
         printStatus(sane_start(handle));
 
+//        int totalDescriptors;
+//        sane_control_option (handle, 0, SANE_ACTION_GET_VALUE, &totalDescriptors, 0);
+//        cout << totalDescriptors << " descriptors total:" << endl;
+//        for(int i = 0; i < totalDescriptors; i++) {
+//            const SANE_Option_Descriptor* cur = sane_get_option_descriptor(handle, i);
+//            cout << i << ": ";
+//            printDescriptor(cur);
+//        }
+
+
         SANE_Parameters parameters;
+        cout << "sane_get_parameters" << endl;
         printStatus(sane_get_parameters(handle, &parameters));
+
+        cout << "depth: " << parameters.depth << endl;
+
+        totalLines = parameters.lines;
+        cout << "lines: " << parameters.lines << endl;
+
+        pixelsPerLine = parameters.pixels_per_line;
+        cout << "pixels per line: " << parameters.pixels_per_line << endl;
+
         bufferSize = parameters.bytes_per_line;
         SANE_Int size;
 
-        cout << "bufferSize = " << bufferSize << endl;
+        cout << "bufferSize (bytes per line) = " << bufferSize << endl;
 
         if(buffer == NULL)
             buffer = new unsigned char[bufferSize];
