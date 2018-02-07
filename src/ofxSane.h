@@ -28,7 +28,8 @@ public:
     size_t getPixelsPerLine();
     size_t getTotalLines();
 
-    ofEvent<lineEventArgs> lineEvent;    
+    ofEvent<lineEventArgs> lineEvent;
+    ofEvent<bool> scanCompleteEvent;
 
 protected:
     void threadedFunction();

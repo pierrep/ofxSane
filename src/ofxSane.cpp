@@ -197,6 +197,8 @@ void ofxSane::threadedFunction()
 
     sane_cancel(handle);
     scanning = false;
+
+   ofNotifyEvent(scanCompleteEvent,scanning);
 }
 
 //--------------------------------------------------------------------
