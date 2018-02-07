@@ -11,7 +11,7 @@ void printDescriptor(const SANE_Option_Descriptor* descriptor);
 
 class lineEventArgs : public ofEventArgs {
 public:
-    int size;
+    size_t size;
     unsigned char* line;
 };
 
