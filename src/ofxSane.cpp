@@ -195,10 +195,10 @@ void ofxSane::threadedFunction()
     ofLogVerbose() << "final status is: ";
     printStatus(status);
 
-    sane_cancel(handle);
-    scanning = false;
+    sane_cancel(handle);    
 
-   ofNotifyEvent(scanCompleteEvent,scanning);
+    ofNotifyEvent(scanCompleteEvent,scanning);
+    scanning = false;
 }
 
 //--------------------------------------------------------------------
